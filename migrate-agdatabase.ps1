@@ -59,7 +59,8 @@ $logDir = Join-Path $PSScriptRoot 'logs'
 if (-not (Test-Path $logDir)) { $null = New-Item -ItemType Directory -Path $logDir }
 $script:LogFilePath = Join-Path $logDir ("migrate-agdatabase_$(Get-Date -Format 'yyyyMMdd_HHmmss')_$PID.log")
 
-$Config = @{ Defaults = @{ VerboseLogging = $VerboseLogging.IsPresent } }
+$Config      = @{ Defaults = @{ VerboseLogging = $VerboseLogging.IsPresent } }
+$totalStart  = Get-Date
 
 function Remove-OrphanedDbFiles {
     param([string[]]$Paths, [string]$ServerName)
@@ -403,3 +404,5 @@ if ($CleanAGDestination) {
 Write-Log "  Target AG  : $AG_Destination ($Node1_destination / $Node2_destination)" 'INF' White
 Write-Log "  Databases  : $($DatabaseNames -join ', ')" 'INF' White
 Write-Log "  Log        : $script:LogFilePath" 'INF' White
+$totalElapsed = (Get-Date) - $totalStart
+Write-Log "  Total time : $('{0:00}:{1:00}:{2:00}' -f $totalElapsed.Hours, $totalElapsed.Minutes, $totalElapsed.Seconds)" 'INF' Cyan
