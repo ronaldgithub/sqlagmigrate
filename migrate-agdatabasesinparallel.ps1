@@ -79,7 +79,7 @@ Write-Host ""
 
 # Phase 1: Start jobs, throttling to MaxParallel concurrent
 while ($pending.Count -gt 0) {
-    while (($jobs | Where-Object { $_.State -eq 'Running' }).Count -ge $effectiveMax) {
+    while (@($jobs | Where-Object { $_.State -eq 'Running' }).Count -ge $effectiveMax) {
         Flush-JobOutput -JobList $jobs
         Start-Sleep -Milliseconds 500
     }
@@ -112,7 +112,7 @@ while ($pending.Count -gt 0) {
 }
 
 # Phase 2: Wait for remaining jobs to finish
-while (($jobs | Where-Object { $_.State -eq 'Running' }).Count -gt 0) {
+while (@($jobs | Where-Object { $_.State -eq 'Running' }).Count -gt 0) {
     Flush-JobOutput -JobList $jobs
     Start-Sleep -Milliseconds 500
 }
