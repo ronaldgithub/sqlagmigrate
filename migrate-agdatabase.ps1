@@ -3,6 +3,10 @@
     Migrate one or more databases from AG_Source to AG_Destination using dbatools with automatic seeding.
 .NOTES
     Requires: dbatools module, sysadmin on all nodes, Windows authentication
+.AUTHOR
+    Ronald de Groot - Apeldoorn (NLD)
+.LINK
+    For questions or help, contact ronald.de.groot@opendata.nl
 #>
 
 <#
