@@ -7,6 +7,8 @@
     Ronald de Groot - Apeldoorn (NLD)
 .LINK
     For questions or help, contact ronald.de.groot@opendata.nl
+.LINK
+    https://dbaronald.nl/sql-server-2016-ag-migration/
 #>
 
 <#
