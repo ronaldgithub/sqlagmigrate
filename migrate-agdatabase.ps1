@@ -69,8 +69,21 @@ function Remove-OrphanedDbFiles {
         $restOfPath  = $localPath.Substring(2)
         $unc = "\\$ServerName\${driveLetter}`$$restOfPath"
         if (Test-Path $unc) {
-            Remove-Item $unc -Force
-            Write-Log "    OK: Bestand verwijderd: $unc" 'INF' Green
+            $deleted = $false
+            for ($attempt = 1; $attempt -le 5 -and -not $deleted; $attempt++) {
+                try {
+                    Remove-Item $unc -Force -ErrorAction Stop
+                    Write-Log "    OK: Bestand verwijderd: $unc" 'INF' Green
+                    $deleted = $true
+                } catch {
+                    if ($attempt -lt 5) {
+                        Write-Log "    Retry $attempt/5: bestand nog in gebruik, wacht 3s..." 'VRB' DarkGray
+                        Start-Sleep -Seconds 3
+                    } else {
+                        throw
+                    }
+                }
+            }
         } else {
             Write-Log "    WARN: Bestand niet gevonden (al weg?): $unc" 'WAR' Yellow
         }

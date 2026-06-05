@@ -133,6 +133,9 @@ foreach ($job in $jobs) {
         Write-Host ("  {0,-8} [{1}]  {2}" -f 'OK', $time, $job.Name) -ForegroundColor Green
     } else {
         Write-Host ("  {0,-8} [{1}]  {2}  (state: {3})" -f 'FAILED', $time, $job.Name, $job.State) -ForegroundColor Red
+        foreach ($err in @($job.ChildJobs[0].Error)) {
+            Write-Host "    ! $($err.Exception.Message)" -ForegroundColor Red
+        }
         $failed++
     }
     Remove-Job -Job $job -Force
