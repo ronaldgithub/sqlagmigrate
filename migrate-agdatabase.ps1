@@ -199,8 +199,13 @@ foreach ($DatabaseName in $DatabaseNames) {
         Write-Log "    OK: Database dropped on $Node2_destination" 'INF' Green
 
         if ($node2Files) {
-            Write-Log "    Orphaned bestanden verwijderen op $Node2_destination..." 'INF' White
-            Remove-OrphanedDbFiles -Paths $node2Files -ServerName $Node2_destination
+            try {
+                Write-Log "    Orphaned bestanden verwijderen op $Node2_destination..." 'INF' White
+                Remove-OrphanedDbFiles -Paths $node2Files -ServerName $Node2_destination
+            } catch {
+                Write-Log "    WARN: Kon orphaned bestanden niet verwijderen op $Node2_destination`: $_" 'WAR' Yellow
+                Write-Log "    Verwijder handmatig: $($node2Files -join ', ')" 'WAR' Yellow
+            }
         }
     } else {
         Write-Log "    WARN: Database not present on $Node2_destination - skipping" 'WAR' Yellow
@@ -221,8 +226,13 @@ foreach ($DatabaseName in $DatabaseNames) {
         Write-Log "    OK: Database dropped on $Node1_destination" 'INF' Green
 
         if ($node1Files) {
-            Write-Log "    Orphaned bestanden verwijderen op $Node1_destination..." 'INF' White
-            Remove-OrphanedDbFiles -Paths $node1Files -ServerName $Node1_destination
+            try {
+                Write-Log "    Orphaned bestanden verwijderen op $Node1_destination..." 'INF' White
+                Remove-OrphanedDbFiles -Paths $node1Files -ServerName $Node1_destination
+            } catch {
+                Write-Log "    WARN: Kon orphaned bestanden niet verwijderen op $Node1_destination`: $_" 'WAR' Yellow
+                Write-Log "    Verwijder handmatig: $($node1Files -join ', ')" 'WAR' Yellow
+            }
         }
     } else {
         Write-Log "    WARN: Database not present on $Node1_destination - skipping drop" 'WAR' Yellow
