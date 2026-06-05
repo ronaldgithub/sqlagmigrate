@@ -12,7 +12,7 @@ Migrate SQL Server databases between Always On Availability Groups using [dbatoo
 
 ## Usage
 
-### Full migration
+### Sequential migration
 
 ```powershell
 .\Migrate-AgDatabase.ps1 `
@@ -26,6 +26,25 @@ Migrate SQL Server databases between Always On Availability Groups using [dbatoo
     -BackupPath        "\\SQL4\temp" `
     -TakeSourceOffline
 ```
+
+### Parallel migration
+
+Run multiple databases simultaneously using background jobs — each database gets its own isolated process and log file.
+
+```powershell
+.\migrate-agdatabasesinparallel.ps1 `
+    -DatabaseName      "Migration01", "Migration02", "Migration03" `
+    -MaxParallel       2 `
+    -AG_Source         "agsql" `
+    -AG_Destination    "agsql2" `
+    -Node1_source      "sql2" `
+    -Node2_source      "sql3" `
+    -Node1_destination "sql4" `
+    -Node2_destination "sql5" `
+    -BackupPath        "\\SQL4\temp"
+```
+
+`-MaxParallel 0` (default) runs all databases at once. Ensure the backup path has enough free space for N concurrent backups (N × average database size).
 
 ### Clean destination AG only (no backup/restore)
 
@@ -44,19 +63,20 @@ Migrate SQL Server databases between Always On Availability Groups using [dbatoo
 
 ## Parameters
 
-| Parameter | Description |
-|---|---|
-| `-DatabaseName` | One or more database names to migrate |
-| `-AG_Source` | Name of the source Availability Group |
-| `-AG_Destination` | Name of the destination Availability Group |
-| `-Node1_source` | Primary node of AG_Source |
-| `-Node2_source` | Secondary node of AG_Source |
-| `-Node1_destination` | Primary node of AG_Destination |
-| `-Node2_destination` | Secondary node of AG_Destination |
-| `-BackupPath` | UNC path accessible from all nodes |
-| `-TakeSourceOffline` | After backup: remove database from AG_Source and set offline |
-| `-CleanAGDestination` | Only clean AG_Destination (steps 1–5), skip backup/restore |
-| `-VerboseLogging` | Capture and log dbatools verbose output |
+| Parameter | Script | Description |
+|---|---|---|
+| `-DatabaseName` | both | One or more database names to migrate |
+| `-AG_Source` | both | Name of the source Availability Group |
+| `-AG_Destination` | both | Name of the destination Availability Group |
+| `-Node1_source` | both | Primary node of AG_Source |
+| `-Node2_source` | both | Secondary node of AG_Source |
+| `-Node1_destination` | both | Primary node of AG_Destination |
+| `-Node2_destination` | both | Secondary node of AG_Destination |
+| `-BackupPath` | both | UNC path accessible from all nodes |
+| `-TakeSourceOffline` | both | After backup: remove database from AG_Source and set offline |
+| `-CleanAGDestination` | both | Only clean AG_Destination (steps 1–5), skip backup/restore |
+| `-VerboseLogging` | both | Capture and log dbatools verbose output |
+| `-MaxParallel` | parallel only | Max concurrent databases (0 = all at once) |
 
 ## What it does
 
@@ -73,7 +93,7 @@ The script runs up to 10 steps per database:
 9. Add to AG_Destination with automatic seeding
 10. Wait for synchronization (up to 10 minutes)
 
-Logs are written to `.\logs\migrate-agdatabase_<timestamp>.log`.
+Logs are written to `.\logs\migrate-agdatabase_<timestamp>_<PID>.log`. In parallel mode each database job gets its own log file.
 
 ## Author
 
