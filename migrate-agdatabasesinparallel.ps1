@@ -104,7 +104,12 @@ while ($pending.Count -gt 0) {
     Write-Host ">>> Starting job: $db" -ForegroundColor Cyan
     $job = Start-Job -Name $db -ScriptBlock {
         param($ScriptPath, $Params)
-        & $ScriptPath @Params
+        try {
+            & $ScriptPath @Params
+        } catch {
+            Write-Host "FATAL: $_"
+            throw
+        }
     } -ArgumentList $scriptPath, $params
 
     $jobs.Add($job)
@@ -133,6 +138,8 @@ foreach ($job in $jobs) {
         Write-Host ("  {0,-8} [{1}]  {2}" -f 'OK', $time, $job.Name) -ForegroundColor Green
     } else {
         Write-Host ("  {0,-8} [{1}]  {2}  (state: {3})" -f 'FAILED', $time, $job.Name, $job.State) -ForegroundColor Red
+        $reason = $job.JobStateInfo.Reason
+        if ($reason) { Write-Host "    ! $($reason.Message)" -ForegroundColor Red }
         foreach ($err in @($job.ChildJobs[0].Error)) {
             Write-Host "    ! $($err.Exception.Message)" -ForegroundColor Red
         }
