@@ -70,6 +70,7 @@ function Flush-JobOutput {
 $jobs       = [System.Collections.Generic.List[object]]::new()
 $startTimes = @{}
 $pending    = [System.Collections.Generic.Queue[string]]::new($DatabaseName)
+$totalStart = Get-Date
 
 Write-Host ""
 Write-Host "=== Migrate-AgDatabasesInParallel ===" -ForegroundColor Cyan
@@ -137,7 +138,11 @@ foreach ($job in $jobs) {
     Remove-Job -Job $job -Force
 }
 
+$totalElapsed = (Get-Date) - $totalStart
+$totalTime    = '{0:00}:{1:00}:{2:00}' -f $totalElapsed.Hours, $totalElapsed.Minutes, $totalElapsed.Seconds
+
 Write-Host ""
+Write-Host "  Total time : $totalTime" -ForegroundColor Cyan
 if ($failed -gt 0) {
     Write-Host "  $failed of $($jobs.Count) database(s) FAILED. Check .\logs\ for details." -ForegroundColor Red
     exit 1
